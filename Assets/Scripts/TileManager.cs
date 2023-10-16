@@ -2,13 +2,14 @@ using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class TileManager : MonoBehaviour
 {
     public Level_ScriptableObject level_ScriptableObject;
+    public Transform[] queuePositions;
 
     [SerializeField] private Transform initPosition;
-    [SerializeField] private Transform[] queuePosition;
 
     private bool canPlay = false;
     private int randomTextureIndex;
@@ -16,6 +17,7 @@ public class TileManager : MonoBehaviour
     private int numberTileSpawn;
     private int tileTotal;
     private readonly List<int> numberTextures = new();
+    [SerializeField] private List<Tile> tiles = new();
 
     private void Start()
     {
@@ -41,25 +43,52 @@ public class TileManager : MonoBehaviour
 
             if (Physics.Raycast(ray, out RaycastHit hitInfo))
             {
-                if (hitInfo.collider.gameObject.GetComponent<Tile>() != null)
+                if (hitInfo.collider.gameObject.GetComponent<Tile>())
                 {
-                    for (int i = 0; i < queuePosition.Length; i++)
+                    Tile tile = hitInfo.collider.gameObject.GetComponent<Tile>();
+                    if (tiles.Count < 5)
                     {
-                        if (queuePosition[i].childCount == 0)
-                        {
-                            hitInfo.collider.gameObject.transform.DOMove(queuePosition[i].position, .5f);
-                            hitInfo.collider.gameObject.transform.SetParent(queuePosition[i], true);
-                            hitInfo.collider.gameObject.transform.GetComponent<Rigidbody>().isKinematic = true;
-                            hitInfo.collider.gameObject.transform.rotation = Quaternion.Euler(queuePosition[i].position);
-                        }
+                        tiles.Add(tile);
+                        SortByTileName(tiles);
 
-                        if (i == queuePosition.Length - 1 && queuePosition[i].childCount != 0)
+                        //pickup                        
+                        SortPickupTile();
+
+                        //check match3
+                        for (int i = 0; i < tiles.Count - 2; i++)
                         {
-                            Debug.Log("You lose");
+                            if (tiles[i].name == tiles[i + 1].name && tiles[i].name == tiles[i + 2].name)
+                            {
+                                tiles[i].gameObject.SetActive(false);
+                                tiles[i + 1].gameObject.SetActive(false);
+                                tiles[i + 2].gameObject.SetActive(false);
+                                
+                                tiles.RemoveAt(i);
+                                tiles.RemoveAt(i);
+                                tiles.RemoveAt(i);
+                            }
                         }
+                    }
+                    if (tiles.Count == 5)
+                    {
+                        Debug.Log("Lose");
                     }
                 }
             }
+        }
+    }
+
+    private void LateUpdate()
+    {
+        SortPickupTile();
+    }
+
+    private void SortPickupTile()
+    {
+        foreach (Tile tileTMP in tiles)
+        {
+            int tileIndex = tiles.IndexOf(tileTMP);
+            StartCoroutine(PickupTile(tileTMP.transform, queuePositions[tileIndex]));
         }
     }
 
@@ -68,17 +97,38 @@ public class TileManager : MonoBehaviour
         yield return new WaitForSeconds(.1f);
         for (int i = 0; i < tileTotal; i++)
         {
-            randomTextureIndex = Random.Range(0, numberTextures.Count);
+            randomTextureIndex = UnityEngine.Random.Range(0, numberTextures.Count);
             yield return new WaitForSeconds(.1f);
             GameObject tile = Instantiate(level_ScriptableObject.tilePrefab, initPosition.position, Quaternion.identity);
             tile.AddComponent<Tile>();
             tile.GetComponent<Renderer>().material.mainTexture = level_ScriptableObject.tileTexture[numberTextures[randomTextureIndex]];
-            //Debug.Log(tile.GetComponent<Renderer>().material.mainTexture.name);
             tile.transform.GetComponent<Rigidbody>().AddForce(Vector3.one * 50f, ForceMode.Impulse);
-
+            tile.transform.SetParent(this.transform, false);
             numberTextures.Remove(numberTextures[randomTextureIndex]);
         }
-        yield return new WaitForSeconds(3f);
+        yield return new WaitForSeconds(2f);
         canPlay = true;
+    }
+
+    private IEnumerator PickupTile(Transform current, Transform target)
+    {
+        yield return new WaitForSeconds(.1f);
+        current.transform.DOMove(target.position, .2f);
+        current.transform.SetParent(target, true);
+        current.transform.GetComponent<Rigidbody>().isKinematic = true;
+        current.transform.rotation = Quaternion.Euler(target.position);
+    }
+
+    private void SortByTileName(List<Tile> tiles)
+    {
+        tiles.Sort(new TileComparer());
+    }
+}
+
+public class TileComparer : IComparer<Tile>
+{
+    public int Compare(Tile tile1, Tile tile2)
+    {
+        return string.Compare(tile1.name, tile2.name, StringComparison.Ordinal);
     }
 }

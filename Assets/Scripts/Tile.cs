@@ -3,10 +3,13 @@ using UnityEngine;
 public class Tile : MonoBehaviour
 {
     private Renderer tileRenderer;
+    public string tileName;
 
     private void Start()
     {
         tileRenderer = GetComponent<Renderer>();
+        tileName = tileRenderer.material.mainTexture.name;
+        gameObject.name = tileName;
     }
 
     private void OnMouseEnter()
