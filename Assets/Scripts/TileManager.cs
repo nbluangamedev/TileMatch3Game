@@ -3,36 +3,51 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using TMPro;
 
 public class TileManager : MonoBehaviour
 {
+    public delegate void CollectDiamond(int diamond); //Dinh nghia ham delegate 
+    public static CollectDiamond collectDiamondDelegate; //Khai bao ham delegate
+    private int diamonds = 0;
+
     public Level_ScriptableObject level_ScriptableObject;
     public Transform[] queuePositions;
-
     [SerializeField] private Transform initPosition;
+    [SerializeField] private TextMeshProUGUI levelText;
 
     private bool canPlay = false;
     private int randomTextureIndex;
     private int textureNumber;
-    private int numberTileSpawn;
     private int tileTotal;
-    private readonly List<int> numberTextures = new();
+    private int checkEmptyTile = -1;
+    private List<int> numberTextures = new();
     [SerializeField] private List<Tile> tiles = new();
 
-    private void Start()
+    private void Awake()
     {
+        DOTween.SetTweensCapacity(1000, 50);
+        levelText.text = "Level: " + level_ScriptableObject.level;
         textureNumber = level_ScriptableObject.tileTexture.Length;
-        numberTileSpawn = 3 * level_ScriptableObject.level;
-        tileTotal = level_ScriptableObject.level * textureNumber * 3;
+        tileTotal = textureNumber * 6;
+        checkEmptyTile = tileTotal;
 
         for (int i = 0; i < textureNumber; i++)
         {
-            for (int j = 0; j < numberTileSpawn; j++)
+            for (int j = 0; j < 6; j++)
             {
                 numberTextures.Add(i);
             }
         }
         StartCoroutine(SpawnTile());
+    }
+
+    private void Start()
+    {
+        if (GameManager.HasInstance)
+        {
+            diamonds = GameManager.Instance.Scores;
+        }
     }
 
     private void Update()
@@ -45,36 +60,36 @@ public class TileManager : MonoBehaviour
             {
                 if (hitInfo.collider.gameObject.GetComponent<Tile>())
                 {
+                    checkEmptyTile--;
                     Tile tile = hitInfo.collider.gameObject.GetComponent<Tile>();
                     if (tiles.Count < 5)
                     {
                         tiles.Add(tile);
+                        //sort list
                         SortByTileName(tiles);
 
-                        //pickup                        
+                        //sort position                       
                         SortPickupTile();
 
                         //check match3
-                        for (int i = 0; i < tiles.Count - 2; i++)
-                        {
-                            if (tiles[i].name == tiles[i + 1].name && tiles[i].name == tiles[i + 2].name)
-                            {
-                                tiles[i].gameObject.SetActive(false);
-                                tiles[i + 1].gameObject.SetActive(false);
-                                tiles[i + 2].gameObject.SetActive(false);
-                                
-                                tiles.RemoveAt(i);
-                                tiles.RemoveAt(i);
-                                tiles.RemoveAt(i);
-                            }
-                        }
+                        CheckMatchThree(tiles);
                     }
                     if (tiles.Count == 5)
                     {
-                        Debug.Log("Lose");
+                        StartCoroutine(CheckFullSlot(tiles));
                     }
                 }
             }
+        }
+
+        if (checkEmptyTile == 0)
+        {
+            if (AudioManager.HasInstance)
+            {
+                AudioManager.Instance.PlaySE(AUDIO.SE_WIN);
+                Debug.Log("Win");
+            }
+            checkEmptyTile = -1;
         }
     }
 
@@ -83,12 +98,55 @@ public class TileManager : MonoBehaviour
         SortPickupTile();
     }
 
+    private void CheckMatchThree(List<Tile> tiles)
+    {
+        for (int i = 0; i < tiles.Count - 2; i++)
+        {
+            if (tiles[i].name == tiles[i + 1].name && tiles[i].name == tiles[i + 2].name)
+            {
+                StartCoroutine(MatchThree(tiles, i));
+                diamonds++;
+                GameManager.Instance.UpdateScores(diamonds);
+                collectDiamondDelegate(diamonds);
+            }
+        }
+    }
+
     private void SortPickupTile()
     {
         foreach (Tile tileTMP in tiles)
         {
             int tileIndex = tiles.IndexOf(tileTMP);
             StartCoroutine(PickupTile(tileTMP.transform, queuePositions[tileIndex]));
+        }
+    }
+
+    private IEnumerator CheckFullSlot(List<Tile> tiles)
+    {
+        yield return new WaitForSeconds(.7f);
+        if (tiles.Count == 5)
+        {
+            Debug.Log("Lose");
+            canPlay = false;
+            if (AudioManager.HasInstance)
+            {
+                AudioManager.Instance.PlaySE(AUDIO.SE_LOSE);
+            }            
+        }
+    }
+
+    private IEnumerator MatchThree(List<Tile> tiles, int i)
+    {
+        yield return new WaitForSeconds(.3f);
+        tiles[i].gameObject.SetActive(false);
+        tiles[i + 1].gameObject.SetActive(false);
+        tiles[i + 2].gameObject.SetActive(false);
+        tiles.RemoveAt(i);
+        tiles.RemoveAt(i);
+        tiles.RemoveAt(i);
+        if (AudioManager.HasInstance)
+        {
+            AudioManager.Instance.PlaySE(AUDIO.SE_MATCH3);
         }
     }
 
@@ -113,7 +171,7 @@ public class TileManager : MonoBehaviour
     private IEnumerator PickupTile(Transform current, Transform target)
     {
         yield return new WaitForSeconds(.1f);
-        current.transform.DOMove(target.position, .2f);
+        current.transform.DOMove(target.position, .1f);
         current.transform.SetParent(target, true);
         current.transform.GetComponent<Rigidbody>().isKinematic = true;
         current.transform.rotation = Quaternion.Euler(target.position);
