@@ -1,4 +1,4 @@
-using DG.Tweening;
+﻿using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -108,14 +108,16 @@ public class TileManager : MonoBehaviour
         {
             randomTextureIndex = Random.Range(0, numberTextures.Count);
             yield return new WaitForSeconds(.1f);
-            Quaternion rotation = Quaternion.AngleAxis(180f, Vector3.up);
+            Quaternion rotation = Quaternion.AngleAxis(60f, Vector3.up);
             GameObject tile = Instantiate(GameManager.Instance.tilePrefab, initPosition.position, rotation);
+            
             tile.AddComponent<Tile>();
             if (GameManager.HasInstance)
             {
                 tile.GetComponent<Renderer>().material.mainTexture = GameManager.Instance.GetTextureByLevel(levelSelected)[numberTextures[randomTextureIndex]];
             }
-            tile.transform.GetComponent<Rigidbody>().AddForce(Vector3.one * 50f, ForceMode.Impulse);
+
+            tile.transform.GetComponent<Rigidbody>().AddForce(Vector3.one * 50f, ForceMode.Force);
             tile.transform.SetParent(this.transform, false);
             numberTextures.Remove(numberTextures[randomTextureIndex]);
         }

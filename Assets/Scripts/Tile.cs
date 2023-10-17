@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
 public class Tile : MonoBehaviour
-{    
+{
     private Renderer tileRenderer;
 
     private void Start()
@@ -12,7 +12,7 @@ public class Tile : MonoBehaviour
 
     private void OnMouseEnter()
     {
-        tileRenderer.material.color = Color.red;        
+        tileRenderer.material.color = Color.red;
     }
 
     private void OnMouseExit()
