@@ -26,19 +26,20 @@ public class GameManager : BaseManager<GameManager>
     private void Start()
     {
         DOTween.SetTweensCapacity(1000, 50);
-        PlayerPrefs.DeleteKey(CURRENT_LEVEL);
 
         currentLevel = PlayerPrefs.GetInt(CURRENT_LEVEL, 0);
         scores = PlayerPrefs.GetInt(CURRENT_SCORE, 0);
-        Debug.Log("currenLevel " + currentLevel);
 
-        //load file
-        //string loadedData = File.ReadAllText(filePath);
-        //levels = JsonUtility.FromJson<Levels>(loadedData);
+        if (levels.levels.Count <= 0)
+        {
+            //load file
+            string loadedData = File.ReadAllText(filePath);
+            levels = JsonUtility.FromJson<Levels>(loadedData);
+        }
 
         //save file
-        string jsonToSave = JsonUtility.ToJson(levels);
-        File.WriteAllText(filePath, jsonToSave);
+        //string jsonToSave = JsonUtility.ToJson(levels);
+        //File.WriteAllText(filePath, jsonToSave);
     }
 
     public List<Texture2D> GetTextureByLevel(int levelIndex)
@@ -60,7 +61,6 @@ public class GameManager : BaseManager<GameManager>
     public void UpdateScores(int score)
     {
         scores = score;
-        PlayerPrefs.SetInt(CURRENT_SCORE, scores);
     }
 
     public void StartGame()
@@ -84,24 +84,9 @@ public class GameManager : BaseManager<GameManager>
         Time.timeScale = 1f;
     }
 
-    public void RestartGame()
-    {
-        scores = 0;
-        ChangeScene("Main");
-
-        if (UIManager.HasInstance)
-        {
-            UIManager.Instance.ActiveWinPanel(false);
-            UIManager.Instance.ActiveGamePanel(false);
-            UIManager.Instance.ActiveLosePanel(false);
-            UIManager.Instance.ActiveMenuPanel(true);
-        }
-    }
-
     public void EndGame()
     {
         PlayerPrefs.SetInt(CURRENT_LEVEL, currentLevel);
-        PlayerPrefs.SetInt(CURRENT_SCORE, scores);
 
 #if UNITY_EDITOR
         EditorApplication.isPlaying = false;

@@ -26,6 +26,10 @@ public class UIManager : BaseManager<UIManager>
     private LosePanel losePanel;
     public LosePanel LosePanel => losePanel;
 
+    [SerializeField]
+    private EndPanel endPanel;
+    public EndPanel EndPanel => endPanel;
+
     private void Start()
     {
         ActiveMenuPanel(true);
@@ -34,6 +38,7 @@ public class UIManager : BaseManager<UIManager>
         ActiveGamePanel(false);
         ActiveWinPanel(false);
         ActiveLosePanel(false);
+        ActiveEndPanel(false);
     }
 
     private void Update()
@@ -76,5 +81,10 @@ public class UIManager : BaseManager<UIManager>
     public void ActiveLosePanel(bool active)
     {
         losePanel.gameObject.SetActive(active);
+    }
+
+    public void ActiveEndPanel(bool active)
+    {
+        endPanel.gameObject.SetActive(active);
     }
 }

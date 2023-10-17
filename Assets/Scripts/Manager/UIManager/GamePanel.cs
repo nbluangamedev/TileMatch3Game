@@ -3,9 +3,9 @@ using UnityEngine;
 
 public class GamePanel : MonoBehaviour
 {
+    public TextMeshProUGUI levelText;
+    public TextMeshProUGUI scoreText;
     [SerializeField] private TextMeshProUGUI timeText;
-    [SerializeField] private TextMeshProUGUI levelText;
-    [SerializeField] private TextMeshProUGUI scoreText;
 
     private bool timerIsRunning = false;
     private float timeRemaining;
@@ -16,15 +16,16 @@ public class GamePanel : MonoBehaviour
         if (GameManager.HasInstance)
         {
             timer = GameManager.Instance.levels.levels[GameManager.Instance.CurrentLevel].time;
-            Debug.Log("timer game panel " + timer);
-            levelText.text = "Level: " + (GameManager.Instance.CurrentLevel + 1).ToString();
-            scoreText.text = "Score: " + GameManager.Instance.Scores.ToString();
         }
         SetTimeRemain(timer);
     }
 
     private void OnEnable()
     {
+        if (GameManager.HasInstance)
+        {
+            timer = GameManager.Instance.levels.levels[GameManager.Instance.CurrentLevel].time;
+        }
         SetTimeRemain(timer);
         timerIsRunning = true;
         TileManager.matchThreeDelegate += OnMatchThree;
@@ -37,7 +38,6 @@ public class GamePanel : MonoBehaviour
 
     private void Update()
     {
-        //Debug.Log("time remain: "+timeRemaining);
         if (timerIsRunning)
         {
             if (timeRemaining > 0)

@@ -9,11 +9,6 @@ public class MenuPanel : MonoBehaviour
             UIManager.Instance.ActiveMenuPanel(false);
             UIManager.Instance.ActiveLoadingPanel(true);
         }
-
-        if (AudioManager.HasInstance)
-        {
-            //AudioManager.Instance.PlayBGM(AUDIO.BGM_BGM_02, 0.5f);
-        }
     }
 
     public void OnSettingButtonClick()

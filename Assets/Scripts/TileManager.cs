@@ -19,24 +19,23 @@ public class TileManager : MonoBehaviour
     private int textureNumber;
     private int tileTotal;
     private int checkEmptyTile = -1;
-    private List<int> numberTextures = new();
-
-    private void Awake()
-    {
-    }
+    private readonly List<int> numberTextures = new();
 
     private void Start()
     {
         if (GameManager.HasInstance)
         {
             levelSelected = GameManager.Instance.CurrentLevel;
+            scores = GameManager.Instance.Scores;
+        }
+
+        if (UIManager.HasInstance)
+        {
+            UIManager.Instance.GamePanel.levelText.text = "Level: " + (levelSelected + 1).ToString();
+            UIManager.Instance.GamePanel.scoreText.text = "Score: " + scores.ToString();
         }
 
         SpawnTileByLevel(levelSelected);
-        if (GameManager.HasInstance)
-        {
-            scores = GameManager.Instance.Scores;
-        }
     }
 
     private void Update()
@@ -74,11 +73,6 @@ public class TileManager : MonoBehaviour
 
         if (checkEmptyTile == 0)
         {
-            if (GameManager.HasInstance)
-            {
-                GameManager.Instance.UpdateLevel(0);
-                GameManager.Instance.UpdateScores(0);
-            }
             StartCoroutine(WinAction());
         }
     }
@@ -114,7 +108,8 @@ public class TileManager : MonoBehaviour
         {
             randomTextureIndex = Random.Range(0, numberTextures.Count);
             yield return new WaitForSeconds(.1f);
-            GameObject tile = Instantiate(GameManager.Instance.tilePrefab, initPosition.position, Quaternion.identity);
+            Quaternion rotation = Quaternion.AngleAxis(180f, Vector3.up);
+            GameObject tile = Instantiate(GameManager.Instance.tilePrefab, initPosition.position, rotation);
             tile.AddComponent<Tile>();
             if (GameManager.HasInstance)
             {
@@ -143,7 +138,7 @@ public class TileManager : MonoBehaviour
         current.transform.DOMove(target.position, .1f);
         current.transform.SetParent(target, true);
         current.transform.GetComponent<Rigidbody>().isKinematic = true;
-        current.transform.rotation = Quaternion.Euler(target.position);
+        current.transform.rotation = Quaternion.AngleAxis(180f, Vector3.up);
     }
 
     private void CheckMatchThree(List<Tile> tiles)
@@ -185,15 +180,37 @@ public class TileManager : MonoBehaviour
         {
             AudioManager.Instance.PlaySE(AUDIO.SE_WIN);
         }
-        if (UIManager.HasInstance)
+
+        if (levelSelected < 2)
         {
-            UIManager.Instance.ActiveWinPanel(true);
+            if (UIManager.HasInstance)
+            {
+                UIManager.Instance.ActiveWinPanel(true);
+                UIManager.Instance.ActiveGamePanel(false);
+            }
+            if (GameManager.HasInstance)
+            {
+                PlayerPrefs.SetInt("CurrentScore", scores);
+                GameManager.Instance.ChangeScene("Main");
+                GameManager.Instance.UpdateLevel(levelSelected + 1);
+            }
         }
-        //if (GameManager.HasInstance)
-        //{
-        //    GameManager.Instance.ChangeScene("Main");
-        //    GameManager.Instance.UpdateLevel(levelSelected);
-        //}
+        else
+        {
+            if (UIManager.HasInstance)
+            {
+                UIManager.Instance.ActiveEndPanel(true);
+                UIManager.Instance.ActiveGamePanel(false);
+            }
+
+            if (GameManager.HasInstance)
+            {
+                PlayerPrefs.DeleteKey("CurrentLevel");
+                PlayerPrefs.DeleteKey("CurrentScore");
+                GameManager.Instance.UpdateLevel(0);
+                GameManager.Instance.ChangeScene("Main");
+            }
+        }
         yield return new WaitForSeconds(.1f);
         checkEmptyTile = -1;
     }
@@ -206,17 +223,19 @@ public class TileManager : MonoBehaviour
             if (UIManager.HasInstance)
             {
                 UIManager.Instance.ActiveLosePanel(true);
+                UIManager.Instance.ActiveGamePanel(false);
             }
             canPlay = false;
             if (AudioManager.HasInstance)
             {
                 AudioManager.Instance.PlaySE(AUDIO.SE_LOSE);
             }
-            //if (GameManager.HasInstance)
-            //{
-            //    GameManager.Instance.ChangeScene("Main");
-            //    GameManager.Instance.UpdateLevel(levelSelected - 1);
-            //}
+
+            if (GameManager.HasInstance)
+            {
+                GameManager.Instance.ChangeScene("Main");
+                GameManager.Instance.UpdateLevel(levelSelected);
+            }
         }
     }
 
