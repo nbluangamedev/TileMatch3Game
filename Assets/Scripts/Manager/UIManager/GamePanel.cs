@@ -15,7 +15,7 @@ public class GamePanel : MonoBehaviour
     {
         if (GameManager.HasInstance)
         {
-            timer = GameManager.Instance.levels.levels[GameManager.Instance.CurrentLevel].time;
+            timer = GameManager.Instance.levelDatas.levelDatas[GameManager.Instance.CurrentLevel].time;
         }
         SetTimeRemain(timer);
     }
@@ -24,7 +24,7 @@ public class GamePanel : MonoBehaviour
     {
         if (GameManager.HasInstance)
         {
-            timer = GameManager.Instance.levels.levels[GameManager.Instance.CurrentLevel].time;
+            timer = GameManager.Instance.levelDatas.levelDatas[GameManager.Instance.CurrentLevel].time;
         }
         SetTimeRemain(timer);
         timerIsRunning = true;

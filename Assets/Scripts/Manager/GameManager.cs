@@ -12,7 +12,7 @@ public class GameManager : BaseManager<GameManager>
     private readonly string CURRENT_SCORE = "CurrentScore";
 
     public GameObject tilePrefab;
-    public Levels levels = new();
+    public LevelDatas levelDatas = new();
 
     private int currentLevel;
     public int CurrentLevel => currentLevel;
@@ -25,31 +25,28 @@ public class GameManager : BaseManager<GameManager>
 
     private void Start()
     {
-        DOTween.SetTweensCapacity(1000, 50);
+        DOTween.SetTweensCapacity(150, 50);
 
         currentLevel = PlayerPrefs.GetInt(CURRENT_LEVEL, 0);
         scores = PlayerPrefs.GetInt(CURRENT_SCORE, 0);
 
-        if (levels.levels.Count <= 0)
-        {
-            //load file
-            string loadedData = File.ReadAllText(filePath);
-            levels = JsonUtility.FromJson<Levels>(loadedData);
-        }
+        //load file
+        //string loadedData = File.ReadAllText(filePath);
+        //levelDatas = JsonUtility.FromJson<LevelDatas>(loadedData);
 
         //save file
-        //string jsonToSave = JsonUtility.ToJson(levels);
-        //File.WriteAllText(filePath, jsonToSave);
+        string jsonToSave = JsonUtility.ToJson(levelDatas);
+        File.WriteAllText(filePath, jsonToSave);
     }
 
     public List<Texture2D> GetTextureByLevel(int levelIndex)
     {
-        return levels.levels[levelIndex].tileTextures;
+        return levelDatas.levelDatas[levelIndex].tileTextures;
     }
 
     public int GetNumberTextureByLevel(int levelIndex)
     {
-        return levels.levels[levelIndex].tileTextures.Count;
+        return levelDatas.levelDatas[levelIndex].tileTextures.Count;
     }
 
     public void UpdateLevel(int level)

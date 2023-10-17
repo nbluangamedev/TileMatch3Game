@@ -3,7 +3,7 @@ using UnityEngine;
 using System;
 
 [Serializable]
-public class Level
+public class LevelData
 {    
     public int level;
     public int time;    
@@ -11,9 +11,9 @@ public class Level
 }
 
 [Serializable]
-public class Levels
+public class LevelDatas
 {
-    public List<Level> levels;
+    public List<LevelData> levelDatas;
 }
 
 public class TileComparer : IComparer<Tile>
