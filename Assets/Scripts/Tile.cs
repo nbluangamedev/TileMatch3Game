@@ -1,14 +1,12 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class Tile : MonoBehaviour
-{
+{    
     private Renderer tileRenderer;
-    //[HideInInspector] public string tileName;
 
     private void Start()
     {
         tileRenderer = GetComponent<Renderer>();
-        //tileName = tileRenderer.material.mainTexture.name;
         gameObject.name = tileRenderer.material.mainTexture.name;
     }
 

@@ -2,51 +2,40 @@ using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System;
-using TMPro;
 
 public class TileManager : MonoBehaviour
 {
-    public delegate void CollectDiamond(int diamond); //Dinh nghia ham delegate 
-    public static CollectDiamond collectDiamondDelegate; //Khai bao ham delegate
-    private int diamonds = 0;
+    public delegate void MatchThreeDelegate(int score); //Dinh nghia ham delegate
+    public static MatchThreeDelegate matchThreeDelegate; //Khai bao ham delegate
 
-    public Level_ScriptableObject level_ScriptableObject;
-    public Transform[] queuePositions;
     [SerializeField] private Transform initPosition;
-    [SerializeField] private TextMeshProUGUI levelText;
+    [SerializeField] private Transform[] queuePositions;
+    [SerializeField] private List<Tile> tiles = new();
 
+    private int scores;
     private bool canPlay = false;
+    private int levelSelected;
     private int randomTextureIndex;
     private int textureNumber;
     private int tileTotal;
     private int checkEmptyTile = -1;
     private List<int> numberTextures = new();
-    [SerializeField] private List<Tile> tiles = new();
 
     private void Awake()
     {
-        DOTween.SetTweensCapacity(1000, 50);
-        levelText.text = "Level: " + level_ScriptableObject.level;
-        textureNumber = level_ScriptableObject.tileTexture.Length;
-        tileTotal = textureNumber * 6;
-        checkEmptyTile = tileTotal;
-
-        for (int i = 0; i < textureNumber; i++)
-        {
-            for (int j = 0; j < 6; j++)
-            {
-                numberTextures.Add(i);
-            }
-        }
-        StartCoroutine(SpawnTile());
     }
 
     private void Start()
     {
         if (GameManager.HasInstance)
         {
-            diamonds = GameManager.Instance.Scores;
+            levelSelected = GameManager.Instance.CurrentLevel;
+        }
+
+        SpawnTileByLevel(levelSelected);
+        if (GameManager.HasInstance)
+        {
+            scores = GameManager.Instance.Scores;
         }
     }
 
@@ -65,6 +54,7 @@ public class TileManager : MonoBehaviour
                     if (tiles.Count < 5)
                     {
                         tiles.Add(tile);
+
                         //sort list
                         SortByTileName(tiles);
 
@@ -84,12 +74,12 @@ public class TileManager : MonoBehaviour
 
         if (checkEmptyTile == 0)
         {
-            if (AudioManager.HasInstance)
+            if (GameManager.HasInstance)
             {
-                AudioManager.Instance.PlaySE(AUDIO.SE_WIN);
-                Debug.Log("Win");
+                GameManager.Instance.UpdateLevel(0);
+                GameManager.Instance.UpdateScores(0);
             }
-            checkEmptyTile = -1;
+            StartCoroutine(WinAction());
         }
     }
 
@@ -98,18 +88,44 @@ public class TileManager : MonoBehaviour
         SortPickupTile();
     }
 
-    private void CheckMatchThree(List<Tile> tiles)
+    private void SpawnTileByLevel(int levelSelected)
     {
-        for (int i = 0; i < tiles.Count - 2; i++)
+        if (GameManager.HasInstance)
         {
-            if (tiles[i].name == tiles[i + 1].name && tiles[i].name == tiles[i + 2].name)
+            textureNumber = GameManager.Instance.GetNumberTextureByLevel(levelSelected);
+        }
+        tileTotal = textureNumber * 6;
+        checkEmptyTile = tileTotal;
+
+        for (int i = 0; i < textureNumber; i++)
+        {
+            for (int j = 0; j < 6; j++)
             {
-                StartCoroutine(MatchThree(tiles, i));
-                diamonds++;
-                GameManager.Instance.UpdateScores(diamonds);
-                collectDiamondDelegate(diamonds);
+                numberTextures.Add(i);
             }
         }
+        StartCoroutine(SpawnTile());
+    }
+
+    private IEnumerator SpawnTile()
+    {
+        yield return new WaitForSeconds(.1f);
+        for (int i = 0; i < tileTotal; i++)
+        {
+            randomTextureIndex = Random.Range(0, numberTextures.Count);
+            yield return new WaitForSeconds(.1f);
+            GameObject tile = Instantiate(GameManager.Instance.tilePrefab, initPosition.position, Quaternion.identity);
+            tile.AddComponent<Tile>();
+            if (GameManager.HasInstance)
+            {
+                tile.GetComponent<Renderer>().material.mainTexture = GameManager.Instance.GetTextureByLevel(levelSelected)[numberTextures[randomTextureIndex]];
+            }
+            tile.transform.GetComponent<Rigidbody>().AddForce(Vector3.one * 50f, ForceMode.Impulse);
+            tile.transform.SetParent(this.transform, false);
+            numberTextures.Remove(numberTextures[randomTextureIndex]);
+        }
+        yield return new WaitForSeconds(2f);
+        canPlay = true;
     }
 
     private void SortPickupTile()
@@ -121,17 +137,29 @@ public class TileManager : MonoBehaviour
         }
     }
 
-    private IEnumerator CheckFullSlot(List<Tile> tiles)
+    private IEnumerator PickupTile(Transform current, Transform target)
     {
-        yield return new WaitForSeconds(.7f);
-        if (tiles.Count == 5)
+        yield return new WaitForSeconds(.1f);
+        current.transform.DOMove(target.position, .1f);
+        current.transform.SetParent(target, true);
+        current.transform.GetComponent<Rigidbody>().isKinematic = true;
+        current.transform.rotation = Quaternion.Euler(target.position);
+    }
+
+    private void CheckMatchThree(List<Tile> tiles)
+    {
+        for (int i = 0; i < tiles.Count - 2; i++)
         {
-            Debug.Log("Lose");
-            canPlay = false;
-            if (AudioManager.HasInstance)
+            if (tiles[i].name == tiles[i + 1].name && tiles[i].name == tiles[i + 2].name)
             {
-                AudioManager.Instance.PlaySE(AUDIO.SE_LOSE);
-            }            
+                StartCoroutine(MatchThree(tiles, i));
+                scores++;
+                if (GameManager.HasInstance)
+                {
+                    GameManager.Instance.UpdateScores(scores);
+                }
+                matchThreeDelegate(scores);
+            }
         }
     }
 
@@ -150,43 +178,50 @@ public class TileManager : MonoBehaviour
         }
     }
 
-    private IEnumerator SpawnTile()
+    private IEnumerator WinAction()
     {
-        yield return new WaitForSeconds(.1f);
-        for (int i = 0; i < tileTotal; i++)
+        yield return new WaitForSeconds(.5f);
+        if (AudioManager.HasInstance)
         {
-            randomTextureIndex = UnityEngine.Random.Range(0, numberTextures.Count);
-            yield return new WaitForSeconds(.1f);
-            GameObject tile = Instantiate(level_ScriptableObject.tilePrefab, initPosition.position, Quaternion.identity);
-            tile.AddComponent<Tile>();
-            tile.GetComponent<Renderer>().material.mainTexture = level_ScriptableObject.tileTexture[numberTextures[randomTextureIndex]];
-            tile.transform.GetComponent<Rigidbody>().AddForce(Vector3.one * 50f, ForceMode.Impulse);
-            tile.transform.SetParent(this.transform, false);
-            numberTextures.Remove(numberTextures[randomTextureIndex]);
+            AudioManager.Instance.PlaySE(AUDIO.SE_WIN);
         }
-        yield return new WaitForSeconds(2f);
-        canPlay = true;
+        if (UIManager.HasInstance)
+        {
+            UIManager.Instance.ActiveWinPanel(true);
+        }
+        //if (GameManager.HasInstance)
+        //{
+        //    GameManager.Instance.ChangeScene("Main");
+        //    GameManager.Instance.UpdateLevel(levelSelected);
+        //}
+        yield return new WaitForSeconds(.1f);
+        checkEmptyTile = -1;
     }
 
-    private IEnumerator PickupTile(Transform current, Transform target)
+    private IEnumerator CheckFullSlot(List<Tile> tiles)
     {
-        yield return new WaitForSeconds(.1f);
-        current.transform.DOMove(target.position, .1f);
-        current.transform.SetParent(target, true);
-        current.transform.GetComponent<Rigidbody>().isKinematic = true;
-        current.transform.rotation = Quaternion.Euler(target.position);
+        yield return new WaitForSeconds(.7f);
+        if (tiles.Count == 5)
+        {
+            if (UIManager.HasInstance)
+            {
+                UIManager.Instance.ActiveLosePanel(true);
+            }
+            canPlay = false;
+            if (AudioManager.HasInstance)
+            {
+                AudioManager.Instance.PlaySE(AUDIO.SE_LOSE);
+            }
+            //if (GameManager.HasInstance)
+            //{
+            //    GameManager.Instance.ChangeScene("Main");
+            //    GameManager.Instance.UpdateLevel(levelSelected - 1);
+            //}
+        }
     }
 
     private void SortByTileName(List<Tile> tiles)
     {
         tiles.Sort(new TileComparer());
-    }
-}
-
-public class TileComparer : IComparer<Tile>
-{
-    public int Compare(Tile tile1, Tile tile2)
-    {
-        return string.Compare(tile1.name, tile2.name, StringComparison.Ordinal);
     }
 }
