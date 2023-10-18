@@ -8,7 +8,6 @@ public class GameManager : BaseManager<GameManager>
 {
     private readonly string CURRENT_LEVEL = "CurrentLevel";
     private readonly string CURRENT_SCORE = "CurrentScore";
-    private string filePath = Path.Combine("Assets", "Resources", "LevelData", "levels.json");
 
     public GameObject tilePrefab;
     public Levels levels = new();

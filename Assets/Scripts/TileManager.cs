@@ -59,13 +59,13 @@ public class TileManager : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0) && canPlay && canClick)
         {
-            canClick = false;
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
             if (Physics.Raycast(ray, out RaycastHit hitInfo))
             {
                 if (hitInfo.collider.gameObject.GetComponent<Tile>())
                 {
+                    canClick = false;
                     checkEmptyTile--;
                     Tile tile = hitInfo.collider.gameObject.GetComponent<Tile>();
                     if (tilePickups.Count < 5)
@@ -98,6 +98,11 @@ public class TileManager : MonoBehaviour
     private void LateUpdate()
     {
         SortPickupTile();
+    }
+
+    private void OnDestroy()
+    {
+        DOTween.KillAll();
     }
 
     private void SpawnTileByLevel(int levelSelected)
@@ -147,7 +152,8 @@ public class TileManager : MonoBehaviour
 
     private IEnumerator PickupTile(Transform current, Transform target)
     {
-        yield return new WaitForSeconds(.1f);
+        //yield return new WaitForSeconds(.1f);
+        yield return null;
         current.transform.DOMove(target.position, .1f);
         current.transform.rotation = Quaternion.AngleAxis(180f, Vector3.up);
         current.transform.GetComponent<Rigidbody>().isKinematic = true;
@@ -191,7 +197,6 @@ public class TileManager : MonoBehaviour
     private IEnumerator WinAction()
     {
         yield return new WaitForSeconds(.5f);
-        DOTween.KillAll();
         if (AudioManager.HasInstance)
         {
             AudioManager.Instance.PlaySE(AUDIO.SE_WIN);
@@ -199,6 +204,7 @@ public class TileManager : MonoBehaviour
 
         if (levelSelected < 2)
         {
+            DOTween.KillAll();
             if (UIManager.HasInstance)
             {
                 UIManager.Instance.ActiveWinPanel(true);
@@ -213,6 +219,7 @@ public class TileManager : MonoBehaviour
         }
         else
         {
+            DOTween.KillAll();
             if (UIManager.HasInstance)
             {
                 UIManager.Instance.ActiveEndPanel(true);
@@ -235,15 +242,16 @@ public class TileManager : MonoBehaviour
     private IEnumerator CheckFullSlot(List<Tile> tiles)
     {
         yield return new WaitForSeconds(.7f);
-        DOTween.KillAll();
         if (tiles.Count == 5)
         {
+            DOTween.KillAll();
+            canPlay = false;
+
             if (UIManager.HasInstance)
             {
                 UIManager.Instance.ActiveLosePanel(true);
                 UIManager.Instance.ActiveGamePanel(false);
             }
-            canPlay = false;
             if (AudioManager.HasInstance)
             {
                 AudioManager.Instance.PlaySE(AUDIO.SE_LOSE);
@@ -252,8 +260,8 @@ public class TileManager : MonoBehaviour
             if (GameManager.HasInstance)
             {
                 GameManager.Instance.UpdateScores(scoreWhenLose);
-                GameManager.Instance.ChangeScene("Main");
                 GameManager.Instance.UpdateLevel(levelSelected);
+                GameManager.Instance.ChangeScene("Main");
             }
         }
     }

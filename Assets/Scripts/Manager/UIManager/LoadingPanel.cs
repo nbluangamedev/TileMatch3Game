@@ -14,24 +14,23 @@ public class LoadingPanel : MonoBehaviour
 
     IEnumerator LoadScene()
     {
-        yield return new WaitForSeconds(.5f);
+        yield return new WaitForSeconds(1f);
 
         AsyncOperation asyncOperation = SceneManager.LoadSceneAsync("Level");
         asyncOperation.allowSceneActivation = false;
         while (!asyncOperation.isDone)
         {
-            loadingPercentText.SetText($"LOADING SCENES: {asyncOperation.progress * 100}%");
             if (asyncOperation.progress >= 0.9f)
             {
-                loadingPercentText.SetText("Press to continue !!!");
-
+                yield return new WaitForSeconds(.1f);
+                loadingPercentText.SetText("Press to continue !!");
                 if (Input.GetKeyDown(KeyCode.Space) || Input.GetMouseButtonDown(0))
                 {
                     asyncOperation.allowSceneActivation = true;
                     if (UIManager.HasInstance)
                     {
-                        UIManager.Instance.ActiveGamePanel(true);
                         UIManager.Instance.ActiveLoadingPanel(false);
+                        UIManager.Instance.ActiveGamePanel(true);
                     }
                     if (GameManager.HasInstance)
                     {
@@ -39,7 +38,6 @@ public class LoadingPanel : MonoBehaviour
                     }
                 }
             }
-            yield return null;
         }
     }
 }
