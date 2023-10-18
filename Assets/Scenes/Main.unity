@@ -6328,6 +6328,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2fe1d13425d09a84fb01f524d7d19f0e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  timerCanStart:
+    m_PersistentCalls:
+      m_Calls: []
   tilePrefab: {fileID: 3046083169224708365, guid: e355109d507ba4f48ad9424c7e7c7390, type: 3}
   levels:
     level_List: []
