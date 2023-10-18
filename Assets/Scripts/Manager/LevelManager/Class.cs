@@ -1,19 +1,18 @@
- using System.Collections.Generic;
-using UnityEngine;
+using System.Collections.Generic;
 using System;
 
 [Serializable]
-public class LevelData
-{    
+public class Level
+{
     public int level;
-    public int time;    
-    public List<Texture2D> tileTextures;
+    public int time;
+    public List<string> nameTextures;
 }
 
 [Serializable]
-public class LevelDatas
+public class Levels
 {
-    public List<LevelData> levelDatas;
+    public List<Level> level_List;
 }
 
 public class TileComparer : IComparer<Tile>

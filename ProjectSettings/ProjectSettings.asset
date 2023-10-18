@@ -69,10 +69,10 @@ PlayerSettings:
   androidUseSwappy: 1
   androidBlitType: 0
   androidResizableWindow: 0
-  androidDefaultWindowWidth: 720
-  androidDefaultWindowHeight: 1280
-  androidMinimumWindowWidth: 900
-  androidMinimumWindowHeight: 1600
+  androidDefaultWindowWidth: 1080
+  androidDefaultWindowHeight: 2400
+  androidMinimumWindowWidth: 1080
+  androidMinimumWindowHeight: 2400
   androidFullscreenMode: 3
   defaultIsNativeResolution: 1
   macRetinaSupport: 1
@@ -88,7 +88,7 @@ PlayerSettings:
   bakeCollisionMeshes: 0
   forceSingleInstance: 0
   useFlipModelSwapchain: 1
-  resizableWindow: 1
+  resizableWindow: 0
   useMacAppStoreValidation: 0
   macAppStoreCategory: public.app-category.games
   gpuSkinning: 1
@@ -155,7 +155,7 @@ PlayerSettings:
   androidSupportedAspectRatio: 1
   androidMaxAspectRatio: 2.1
   applicationIdentifier:
-    Android: com.DefaultCompany.TileMasterTrip3D
+    Android: com.NBLuanGameDev.TileMasterTrip3D
     Standalone: com.NBLuanGameDev.TileMasterTrip3D
   buildNumber:
     Standalone: 0
@@ -837,7 +837,7 @@ PlayerSettings:
   allowUnsafeCode: 0
   useDeterministicCompilation: 1
   enableRoslynAnalyzers: 1
-  selectedPlatform: 0
+  selectedPlatform: 2
   additionalIl2CppArgs: 
   scriptingRuntimeVersion: 1
   gcIncremental: 1

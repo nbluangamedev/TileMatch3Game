@@ -7,7 +7,6 @@ public class Tile : MonoBehaviour
     private void Start()
     {
         tileRenderer = GetComponent<Renderer>();
-        gameObject.name = tileRenderer.material.mainTexture.name;
     }
 
     private void OnMouseEnter()

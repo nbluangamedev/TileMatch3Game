@@ -14,7 +14,7 @@ public class LoadingPanel : MonoBehaviour
 
     IEnumerator LoadScene()
     {
-        yield return new WaitForSeconds(.1f);
+        yield return new WaitForSeconds(.5f);
 
         AsyncOperation asyncOperation = SceneManager.LoadSceneAsync("Level");
         asyncOperation.allowSceneActivation = false;

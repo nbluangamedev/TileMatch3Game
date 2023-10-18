@@ -1,5 +1,4 @@
 using DG.Tweening;
-using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
@@ -7,12 +6,12 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : BaseManager<GameManager>
 {
-    private readonly string filePath = Path.Combine("Assets", "Resources", "LevelData", "levels.json");
     private readonly string CURRENT_LEVEL = "CurrentLevel";
     private readonly string CURRENT_SCORE = "CurrentScore";
+    private string filePath = Path.Combine("Assets", "Resources", "LevelData", "levels.json");
 
     public GameObject tilePrefab;
-    public LevelDatas levelDatas = new();
+    public Levels levels = new();
 
     private int currentLevel;
     public int CurrentLevel => currentLevel;
@@ -25,28 +24,36 @@ public class GameManager : BaseManager<GameManager>
 
     private void Start()
     {
-        DOTween.SetTweensCapacity(150, 50);
+        Application.targetFrameRate = 60;
+        DOTween.SetTweensCapacity(500, 50);
 
         currentLevel = PlayerPrefs.GetInt(CURRENT_LEVEL, 0);
         scores = PlayerPrefs.GetInt(CURRENT_SCORE, 0);
 
         //load file
-        //string loadedData = File.ReadAllText(filePath);
-        //levelDatas = JsonUtility.FromJson<LevelDatas>(loadedData);
+        TextAsset text = Resources.Load<TextAsset>("LevelData/levels");
+        levels = JsonUtility.FromJson<Levels>(text.text);
 
         //save file
-        string jsonToSave = JsonUtility.ToJson(levelDatas);
-        File.WriteAllText(filePath, jsonToSave);
+        //string jsonToSave = JsonUtility.ToJson(levels);
+        //File.WriteAllText(filePath, jsonToSave);
     }
 
-    public List<Texture2D> GetTextureByLevel(int levelIndex)
+    public bool CheckTextureName(int levelIndex, string textureName)
     {
-        return levelDatas.levelDatas[levelIndex].tileTextures;
+        for (int i = 0; i < levels.level_List[levelIndex].nameTextures.Count; i++)
+        {
+            if (levels.level_List[levelIndex].nameTextures[i] == textureName)
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
-    public int GetNumberTextureByLevel(int levelIndex)
+    public int GetTextureNumber(int levelIndex)
     {
-        return levelDatas.levelDatas[levelIndex].tileTextures.Count;
+        return levels.level_List[levelIndex].nameTextures.Count;
     }
 
     public void UpdateLevel(int level)
