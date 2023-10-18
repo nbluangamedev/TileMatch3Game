@@ -14,10 +14,10 @@ public class TileManager : MonoBehaviour
     [SerializeField] private List<Texture2D> textures;
     [SerializeField] private List<Texture2D> listTextures = new();
 
+    private bool canPlay;
     private bool canClick = true;
     private int scores;
     private int scoreWhenLose;
-    private bool canPlay = false;
     private int levelSelected;
     private int randomTextureIndex;
     private int textureNumber;
@@ -33,6 +33,8 @@ public class TileManager : MonoBehaviour
             scores = GameManager.Instance.Scores;
             scoreWhenLose = scores;
             textureNumber = GameManager.Instance.GetTextureNumber(levelSelected);
+            GameManager.Instance.CanPlay = false;
+            canPlay = GameManager.Instance.CanPlay;
         }
 
         if (UIManager.HasInstance)
@@ -52,7 +54,7 @@ public class TileManager : MonoBehaviour
             }
         }
 
-        SpawnTileByLevel(levelSelected);
+        SpawnTileByLevel();
     }
 
     private void Update()
@@ -72,13 +74,10 @@ public class TileManager : MonoBehaviour
                     {
                         tilePickups.Add(tile);
 
-                        //sort list
                         SortByTileName(tilePickups);
 
-                        //sort position                       
                         SortPickupTile();
 
-                        //check match3
                         CheckMatchThree(tilePickups);
                     }
                     if (tilePickups.Count == 5)
@@ -105,7 +104,7 @@ public class TileManager : MonoBehaviour
         DOTween.KillAll();
     }
 
-    private void SpawnTileByLevel(int levelSelected)
+    private void SpawnTileByLevel()
     {
         tileTotal = textureNumber * 6;
         checkEmptyTile = tileTotal;
@@ -123,22 +122,25 @@ public class TileManager : MonoBehaviour
     private IEnumerator SpawnTile()
     {
         yield return new WaitForSeconds(.1f);
-
-        for (int i = 0; i < tileTotal; i++)
+        if (GameManager.HasInstance)
         {
-            randomTextureIndex = Random.Range(0, numberTileSpawns.Count);
+            for (int i = 0; i < tileTotal; i++)
+            {
+                randomTextureIndex = Random.Range(0, numberTileSpawns.Count);
 
-            yield return new WaitForSeconds(.1f);
-            GameObject tile = Instantiate(GameManager.Instance.tilePrefab, initPosition.position, Quaternion.identity);
-            tile.AddComponent<Tile>();
-            tile.GetComponent<Renderer>().material.mainTexture = listTextures[numberTileSpawns[randomTextureIndex]];
-            tile.name = listTextures[numberTileSpawns[randomTextureIndex]].name;
-            tile.transform.GetComponent<Rigidbody>().AddForce(Vector3.one * 50f, ForceMode.Impulse);
-            tile.transform.SetParent(this.transform, false);
-            numberTileSpawns.Remove(numberTileSpawns[randomTextureIndex]);
+                yield return new WaitForSeconds(.1f);
+                GameObject tile = Instantiate(GameManager.Instance.tilePrefab, initPosition.position, Quaternion.identity);
+                tile.AddComponent<Tile>();
+                tile.GetComponent<Renderer>().material.mainTexture = listTextures[numberTileSpawns[randomTextureIndex]];
+                tile.name = listTextures[numberTileSpawns[randomTextureIndex]].name;
+                tile.transform.GetComponent<Rigidbody>().AddForce(Vector3.one * 50f, ForceMode.Impulse);
+                tile.transform.SetParent(this.transform, false);
+                numberTileSpawns.Remove(numberTileSpawns[randomTextureIndex]);
+            }
+            yield return new WaitForSeconds(2f);
+            GameManager.Instance.CanPlay = true;
+            canPlay = GameManager.Instance.CanPlay;
         }
-        yield return new WaitForSeconds(2f);
-        canPlay = true;
     }
 
     private void SortPickupTile()
@@ -152,7 +154,6 @@ public class TileManager : MonoBehaviour
 
     private IEnumerator PickupTile(Transform current, Transform target)
     {
-        //yield return new WaitForSeconds(.1f);
         yield return null;
         current.transform.DOMove(target.position, .1f);
         current.transform.rotation = Quaternion.AngleAxis(180f, Vector3.up);
@@ -242,7 +243,7 @@ public class TileManager : MonoBehaviour
     private IEnumerator CheckFullSlot(List<Tile> tiles)
     {
         yield return new WaitForSeconds(.7f);
-        if (tiles.Count == 5)
+        if (tiles.Count >= 5)
         {
             DOTween.KillAll();
             canPlay = false;

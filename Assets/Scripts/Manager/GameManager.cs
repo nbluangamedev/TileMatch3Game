@@ -2,12 +2,15 @@ using DG.Tweening;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 
 public class GameManager : BaseManager<GameManager>
 {
     private readonly string CURRENT_LEVEL = "CurrentLevel";
     private readonly string CURRENT_SCORE = "CurrentScore";
+
+    public UnityEvent<bool> timerCanStart;
 
     public GameObject tilePrefab;
     public Levels levels = new();
@@ -20,6 +23,17 @@ public class GameManager : BaseManager<GameManager>
 
     private bool isPlaying = false;
     public bool IsPlaying => isPlaying;
+
+    private bool canPlay = false;
+    public bool CanPlay
+    {
+        get { return canPlay; }
+        set
+        {
+            canPlay = value;
+            timerCanStart?.Invoke(canPlay);
+        }
+    }
 
     private void Start()
     {

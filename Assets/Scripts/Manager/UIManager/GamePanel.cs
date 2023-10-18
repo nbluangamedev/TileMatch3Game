@@ -10,23 +10,17 @@ public class GamePanel : MonoBehaviour
     private bool timerIsRunning = false;
     private float timeRemaining;
     private int timer;
-
-    private void Start()
-    {
-        if (GameManager.HasInstance)
-        {
-            timer = GameManager.Instance.levels.level_List[GameManager.Instance.CurrentLevel].time;
-        }
-        SetTimeRemain(timer);
-    }
+    private bool canPlay;
 
     private void OnEnable()
     {
         if (GameManager.HasInstance)
         {
             timer = GameManager.Instance.levels.level_List[GameManager.Instance.CurrentLevel].time;
+            GameManager.Instance.timerCanStart.AddListener(OnTimerCanStart);
         }
         SetTimeRemain(timer);
+        DisplayTime(timer);
         timerIsRunning = true;
         TileManager.matchThreeDelegate += OnMatchThree;
     }
@@ -34,11 +28,15 @@ public class GamePanel : MonoBehaviour
     private void OnDisable()
     {
         TileManager.matchThreeDelegate -= OnMatchThree;
+        if (GameManager.HasInstance)
+        {
+            GameManager.Instance.timerCanStart.RemoveListener(OnTimerCanStart);
+        }
     }
 
     private void Update()
     {
-        if (timerIsRunning)
+        if (timerIsRunning && canPlay)
         {
             if (timeRemaining > 0)
             {
@@ -56,6 +54,11 @@ public class GamePanel : MonoBehaviour
                 }
             }
         }
+    }
+
+    private void OnTimerCanStart(bool canPlay)
+    {
+        this.canPlay = canPlay;
     }
 
     private void OnMatchThree(int value)

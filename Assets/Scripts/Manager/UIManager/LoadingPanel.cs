@@ -20,18 +20,18 @@ public class LoadingPanel : MonoBehaviour
         asyncOperation.allowSceneActivation = false;
         while (!asyncOperation.isDone)
         {
-            if (asyncOperation.progress >= 0.9f)
+            yield return null;
+            if (asyncOperation.progress > 0.8f)
             {
-                yield return new WaitForSeconds(.1f);
                 loadingPercentText.SetText("Press to continue !!");
-                if (Input.GetKeyDown(KeyCode.Space) || Input.GetMouseButtonDown(0))
+                if (Input.GetMouseButtonDown(0))
                 {
-                    asyncOperation.allowSceneActivation = true;
                     if (UIManager.HasInstance)
                     {
                         UIManager.Instance.ActiveLoadingPanel(false);
                         UIManager.Instance.ActiveGamePanel(true);
                     }
+                    asyncOperation.allowSceneActivation = true;
                     if (GameManager.HasInstance)
                     {
                         GameManager.Instance.StartGame();
