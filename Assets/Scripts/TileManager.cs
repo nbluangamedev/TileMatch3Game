@@ -130,7 +130,6 @@ public class TileManager : MonoBehaviour
 
                 yield return new WaitForSeconds(.1f);
                 GameObject tile = Instantiate(GameManager.Instance.tilePrefab, initPosition.position, Quaternion.identity);
-                tile.AddComponent<Tile>();
                 tile.GetComponent<Renderer>().material.mainTexture = listTextures[numberTileSpawns[randomTextureIndex]];
                 tile.name = listTextures[numberTileSpawns[randomTextureIndex]].name;
                 tile.transform.GetComponent<Rigidbody>().AddForce(Vector3.one * 50f, ForceMode.Impulse);

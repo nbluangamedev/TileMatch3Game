@@ -814,6 +814,22 @@ MonoBehaviour:
   - {fileID: 2800000, guid: 21c463993a6194745b5f3aaf9f5e64f1, type: 3}
   - {fileID: 2800000, guid: 536d0f1087dd0624482dd7331afa8be5, type: 3}
   listTextures: []
+  sprites:
+  - {fileID: 1285496911, guid: fc7a5d1bc92cee04ca8108faf4cb81f7, type: 3}
+  - {fileID: 734954678, guid: fc7a5d1bc92cee04ca8108faf4cb81f7, type: 3}
+  - {fileID: -1355109970, guid: fc7a5d1bc92cee04ca8108faf4cb81f7, type: 3}
+  - {fileID: 1664573667, guid: fc7a5d1bc92cee04ca8108faf4cb81f7, type: 3}
+  - {fileID: 646942238, guid: fc7a5d1bc92cee04ca8108faf4cb81f7, type: 3}
+  - {fileID: -1304261581, guid: fc7a5d1bc92cee04ca8108faf4cb81f7, type: 3}
+  - {fileID: 575323345, guid: fc7a5d1bc92cee04ca8108faf4cb81f7, type: 3}
+  - {fileID: -1703659967, guid: fc7a5d1bc92cee04ca8108faf4cb81f7, type: 3}
+  - {fileID: -1859845276, guid: fc7a5d1bc92cee04ca8108faf4cb81f7, type: 3}
+  - {fileID: 1016691219, guid: fc7a5d1bc92cee04ca8108faf4cb81f7, type: 3}
+  - {fileID: -217481413, guid: fc7a5d1bc92cee04ca8108faf4cb81f7, type: 3}
+  - {fileID: 1724870594, guid: fc7a5d1bc92cee04ca8108faf4cb81f7, type: 3}
+  - {fileID: -946199708, guid: fc7a5d1bc92cee04ca8108faf4cb81f7, type: 3}
+  - {fileID: 108884048, guid: fc7a5d1bc92cee04ca8108faf4cb81f7, type: 3}
+  - {fileID: 1151342778, guid: fc7a5d1bc92cee04ca8108faf4cb81f7, type: 3}
 --- !u!1 &1089158067
 GameObject:
   m_ObjectHideFlags: 0
