@@ -10,8 +10,8 @@ public class TileManager : MonoBehaviour
 
     [SerializeField] private Transform initPosition;
     [SerializeField] private Transform[] queuePositions;
-    [SerializeField] private List<Tile> tilePickups = new();
     [SerializeField] private List<Texture2D> textures;
+    [SerializeField] private List<Tile> tilePickups = new();
     [SerializeField] private List<Texture2D> listTextures = new();
 
     private bool canPlay;
