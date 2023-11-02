@@ -18,6 +18,7 @@ public class TileManager : MonoBehaviour
     private bool canClick = true;
     private int scores;
     private int scoreWhenLose;
+    private int levelNumber;
     private int levelSelected;
     private int randomTextureIndex;
     private int textureNumber;
@@ -29,6 +30,7 @@ public class TileManager : MonoBehaviour
     {
         if (GameManager.HasInstance)
         {
+            levelNumber = GameManager.Instance.levels.level_List.Count;
             levelSelected = GameManager.Instance.CurrentLevel;
             scores = GameManager.Instance.Scores;
             scoreWhenLose = scores;
@@ -202,18 +204,26 @@ public class TileManager : MonoBehaviour
             AudioManager.Instance.PlaySE(AUDIO.SE_WIN);
         }
 
-        if (levelSelected < 2)
+        if (UIManager.HasInstance)
+        {
+            UIManager.Instance.ActiveGamePanel(false);
+        }
+
+        if (GameManager.HasInstance)
+        {
+            PlayerPrefs.SetInt("CurrentScore", scores);
+            GameManager.Instance.ChangeScene("Main");
+        }
+
+        if (levelSelected < levelNumber - 1)
         {
             DOTween.KillAll();
             if (UIManager.HasInstance)
             {
                 UIManager.Instance.ActiveWinPanel(true);
-                UIManager.Instance.ActiveGamePanel(false);
             }
             if (GameManager.HasInstance)
             {
-                PlayerPrefs.SetInt("CurrentScore", scores);
-                GameManager.Instance.ChangeScene("Main");
                 GameManager.Instance.UpdateLevel(levelSelected + 1);
             }
         }
@@ -223,15 +233,11 @@ public class TileManager : MonoBehaviour
             if (UIManager.HasInstance)
             {
                 UIManager.Instance.ActiveEndPanel(true);
-                UIManager.Instance.ActiveGamePanel(false);
             }
 
             if (GameManager.HasInstance)
             {
-                PlayerPrefs.DeleteKey("CurrentLevel");
-                PlayerPrefs.DeleteKey("CurrentScore");
                 GameManager.Instance.UpdateLevel(0);
-                GameManager.Instance.ChangeScene("Main");
             }
         }
 

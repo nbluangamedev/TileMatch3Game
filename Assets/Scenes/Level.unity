@@ -815,6 +815,10 @@ MonoBehaviour:
   - {fileID: 2800000, guid: 8704ea61d463f0744bd7c7fd7bb17d0a, type: 3}
   - {fileID: 2800000, guid: ba0ac11ff12497e45ae26e5d532ad83f, type: 3}
   - {fileID: 2800000, guid: 3ef88176c645bdd4db4b3a6a4bf48a84, type: 3}
+  - {fileID: 2800000, guid: c8ed50b3f3ee56f4a883c36570162f13, type: 3}
+  - {fileID: 2800000, guid: 5c7d60902dd5ace4f9e05d9b714e6389, type: 3}
+  - {fileID: 2800000, guid: 72687f09fad1a0b40ba480cd7b54eeb7, type: 3}
+  - {fileID: 2800000, guid: 585a2a10358cd1140ac61a5436e52a8f, type: 3}
   tilePickups: []
   listTextures: []
 --- !u!1 &1089158067

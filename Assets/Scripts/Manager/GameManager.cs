@@ -10,7 +10,7 @@ public class GameManager : BaseManager<GameManager>
     private readonly string CURRENT_LEVEL = "CurrentLevel";
     private readonly string CURRENT_SCORE = "CurrentScore";
 
-    public UnityEvent<bool> timerCanStart;
+    [HideInInspector] public UnityEvent<bool> timerCanStart;
 
     public GameObject tilePrefab;
     public Levels levels = new();
